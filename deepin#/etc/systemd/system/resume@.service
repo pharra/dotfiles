@@ -1,0 +1,11 @@
+[Unit]
+Description=User resume actions
+After=suspend.target
+
+[Service]
+User=%I
+Type=simple
+ExecStart=/usr/bin/deepin-wm-restart.sh
+
+[Install]
+WantedBy=suspend.target
