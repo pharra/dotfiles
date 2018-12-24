@@ -1,1 +1,2 @@
 shadowsocks#etc/shadowsocks/config.json filter=git-crypt diff=git-crypt
+wireguard#etc/* filter=git-crypt diff=git-crypt
