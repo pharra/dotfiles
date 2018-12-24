@@ -2,9 +2,9 @@
   "BindAddress": ":53",
   "PrimaryDNS": [
     {
-      "Name": "DNSPod",
-      "Address": "119.29.29.29:53",
-      "Protocol": "udp",
+      "Name": "114DNS",
+      "Address": "114.114.114.114:53",
+      "Protocol": "tcp",
       "SOCKS5Address": "",
       "Timeout": 6,
       "EDNSClientSubnet": {
@@ -13,8 +13,8 @@
       }
     },
     {
-      "Name": "114DNS",
-      "Address": "114.114.114.114:53",
+      "Name": "DNSPod",
+      "Address": "119.29.29.29:53",
       "Protocol": "udp",
       "SOCKS5Address": "",
       "Timeout": 6,
@@ -26,8 +26,8 @@
   ],
   "AlternativeDNS": [
     {
-      "Name": "CloudFlareDNS",
-      "Address": "1.1.1.1:53",
+      "Name": "OpenDns6",
+      "Address": "[2620:119:35::35]:53",
       "Protocol": "tcp",
       "SOCKS5Address": "",
       "Timeout": 6,
@@ -49,7 +49,7 @@
     }
   ],
   "OnlyPrimaryDNS": false,
-  "IPv6UseAlternativeDNS": false,
+  "IPv6UseAlternativeDNS": true,
   "IPNetworkFile": {
     "Primary": "/etc/overture/ip_network_primary_sample",
     "Alternative": "/etc/overture/ip_network_alternative_sample"
