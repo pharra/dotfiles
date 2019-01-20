@@ -1,0 +1,26 @@
+[Profile]
+# CurrentGroup
+CurrentGroup=Default
+ 
+[Profile/GroupOrder]
+0=Default
+ 
+[Profile/Groups/0]
+# Default Input Method
+DefaultIM=pinyin
+# Layout
+Default Layout=us
+# Group Name
+Name=Default
+ 
+[Profile/Groups/0/Items/1]
+# Layout
+Layout=
+# Name
+Name=pinyin
+ 
+[Profile/Groups/0/Items/0]
+# Layout
+Layout=
+# Name
+Name=keyboard-us
