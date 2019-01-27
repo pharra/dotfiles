@@ -1,6 +1,5 @@
 [Unit]
 Description=A DNS upstream switcher written in Go in order to purify DNS records
-After=network.target
 
 [Service]
 User=root
@@ -10,4 +9,4 @@ Restart=always
 RestartSec=5
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=network.target
