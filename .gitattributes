@@ -1,5 +1,2 @@
 shadowsocks#etc/shadowsocks/config.json filter=git-crypt diff=git-crypt
-wireguard#etc/wireguard/*.conf filter=git-crypt diff=git-crypt
-wireguard#etc/wireguard/publickey filter=git-crypt diff=git-crypt
-wireguard#etc/wireguard/privatekey filter=git-crypt diff=git-crypt
 overture#/etc/overture/config.json filter=git-crypt diff=git-crypt
