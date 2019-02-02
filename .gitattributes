@@ -1,2 +1,3 @@
 shadowsocks#etc/shadowsocks/config.json filter=git-crypt diff=git-crypt
 overture#/etc/overture/config.json filter=git-crypt diff=git-crypt
+v2ray#etc/v2ray/my.json filter=git-crypt diff=git-crypt
