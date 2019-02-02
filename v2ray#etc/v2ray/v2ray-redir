@@ -1,0 +1,110 @@
+#!/bin/bash
+echoerr() { echo "$@" 1>&2; }
+do_ip6tables() {
+    if [ "$DEBUG" == "1" ]; then
+        echo "ip6tables $@"
+    else
+        ip6tables $@
+    fi
+
+}
+do_iptables() {
+    if [ "$DEBUG" == "1" ]; then
+        echo "iptables $@"
+    else
+        iptables $@
+    fi
+}
+do_ipset() {
+    if [ "$DEBUG" == "1" ]; then
+        echo "ipset $@"
+    else
+        ipset $@
+    fi
+}
+do_ip() {
+    if [ "$DEBUG" == "1" ]; then
+        echo "ip $@"
+    else
+        ip $@
+    fi
+}
+do_v2ray() {
+    if [ "$DEBUG" == "1" ]; then
+        echo "v2ray $@"
+    else
+        v2ray $@
+    fi
+}
+clear_rules() {
+    echo "Clearing rules"
+
+    # TCP
+    do_iptables -t nat -D OUTPUT -p tcp -j V2RAY
+
+    do_iptables -t nat -F V2RAY
+    do_iptables -t nat -X V2RAY
+}
+find_script_path() {
+    SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+}
+
+find_script_path
+
+# MUST be run as root
+if [ `id -u` != "0" ]; then
+    echoerr "This script MUST BE run as ROOT"
+    exit 1
+fi
+
+CONFIG_PATH="$1"
+
+if [ "$CONFIG_PATH" == "" ]; then
+    echoerr "Usage: v2ray-redir <path to config.json>"
+    exit 1
+elif [ "$CONFIG_PATH" == "clear" ]; then
+    clear_rules
+    exit 0
+elif [ ! -f "$CONFIG_PATH" ]; then
+    echoerr "$CONFIG_PATH does not exist"
+    exit 1
+fi
+
+# Create new chain
+do_iptables -t nat -N V2RAY
+
+BYPASS_IPS=`jq -r ".others.bypass_ips" $CONFIG_PATH`
+
+if [[ "$BYPASS_IPS" != "null" ]]; then
+    # Should only iterate when the item is not null
+    BYPASS_IPS=`jq -r ".others.bypass_ips[]" $CONFIG_PATH`
+    for ip in $BYPASS_IPS; do
+        do_iptables -t nat -A V2RAY -d $ip -j RETURN
+    done
+fi
+
+# Bypass users
+BYPASS_USERS=`jq -r ".others.bypass_users" $CONFIG_PATH`
+if [[ "$BYPASS_USERS" != "null" ]]; then
+    BYPASS_USERS=`jq -r ".others.bypass_users[]" $CONFIG_PATH`
+    for user in $BYPASS_USERS; do
+        do_iptables -t nat -A V2RAY -m owner --uid-owner $user -j RETURN
+    done
+fi
+
+V2RAY_MARK=`jq -r ".others.mark" $CONFIG_PATH`
+do_iptables -t nat -A V2RAY -p tcp -j RETURN -m mark --mark $V2RAY_MARK
+
+# Anything else should be redirected to Dokodemo-door's local port
+LOCAL_PORT=`jq -r ".others.redir_port" $CONFIG_PATH`
+do_iptables -t nat -A V2RAY -p tcp -j REDIRECT --to-ports $LOCAL_PORT
+
+
+do_iptables -t nat -A OUTPUT -p tcp -j V2RAY
+
+# start v2ray
+do_v2ray -config $CONFIG_PATH
+
+# ss-redir has exited.
+clear_rules
+
