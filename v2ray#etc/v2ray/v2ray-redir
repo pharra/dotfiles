@@ -40,10 +40,17 @@ clear_rules() {
     echo "Clearing rules"
 
     # TCP
+    do_iptables -t nat -D PREROUTING -p tcp -j V2RAY
     do_iptables -t nat -D OUTPUT -p tcp -j V2RAY
 
     do_iptables -t nat -F V2RAY
     do_iptables -t nat -X V2RAY
+
+    do_ip route del local default dev lo table 100
+    do_ip rule del fwmark 1 table 100
+    do_iptables -t mangle -D PREROUTING -p udp -j V2RAY_UDP
+    do_iptables -t mangle -F V2RAY_UDP
+    do_iptables -t mangle -X V2RAY_UDP
 }
 find_script_path() {
     SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -92,15 +99,28 @@ if [[ "$BYPASS_USERS" != "null" ]]; then
     done
 fi
 
-V2RAY_MARK=`jq -r ".others.mark" $CONFIG_PATH`
-do_iptables -t nat -A V2RAY -p tcp -j RETURN -m mark --mark $V2RAY_MARK
-
+do_iptables -t nat -A V2RAY -p tcp -j RETURN -m mark --mark 0xff
 # Anything else should be redirected to Dokodemo-door's local port
 LOCAL_PORT=`jq -r ".others.redir_port" $CONFIG_PATH`
+DNS_PORT=`jq -r ".others.dns_port" $CONFIG_PATH`
 do_iptables -t nat -A V2RAY -p tcp -j REDIRECT --to-ports $LOCAL_PORT
 
-
+do_iptables -t nat -A PREROUTING -p tcp -j V2RAY
 do_iptables -t nat -A OUTPUT -p tcp -j V2RAY
+
+do_ip route add local default dev lo table 100
+do_ip rule add fwmark 1 table 100
+do_iptables -t mangle -N V2RAY_UDP
+if [[ "$BYPASS_IPS" != "null" ]]; then
+    # Should only iterate when the item is not null
+    BYPASS_IPS=`jq -r ".others.bypass_ips[]" $CONFIG_PATH`
+    for ip in $BYPASS_IPS; do
+        do_iptables -t mangle -A V2RAY_UDP -d $ip -j RETURN
+    done
+fi
+do_iptables -t mangle -A V2RAY_UDP -p udp --dport 53 -j TPROXY --on-port $DNS_PORT --tproxy-mark 1
+#do_iptables -t mangle -A V2RAY_UDP -p udp -j TPROXY --on-port $LOCAL_PORT --tproxy-mark $V2RAY_MARK
+do_iptables -t mangle -A PREROUTING -p udp -j V2RAY_UDP
 
 # start v2ray
 do_v2ray -config $CONFIG_PATH
