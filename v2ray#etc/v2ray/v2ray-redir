@@ -118,7 +118,7 @@ if [[ "$BYPASS_IPS" != "null" ]]; then
         do_iptables -t mangle -A V2RAY_UDP -d $ip -j RETURN
     done
 fi
-do_iptables -t mangle -A V2RAY_UDP -p udp --dport 53 -j TPROXY --on-port $DNS_PORT --tproxy-mark 1
+#do_iptables -t mangle -A V2RAY_UDP -p udp --dport 53 -j TPROXY --on-port $DNS_PORT --tproxy-mark 1
 #do_iptables -t mangle -A V2RAY_UDP -p udp -j TPROXY --on-port $LOCAL_PORT --tproxy-mark $V2RAY_MARK
 do_iptables -t mangle -A PREROUTING -p udp -j V2RAY_UDP
 
