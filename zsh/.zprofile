@@ -5,6 +5,7 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
   case $input in
     [yY][eE][sS]|[yY])
 	nvidia-xrun
+        nvidia-settings --assign CurrentMetaMode="nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }"
 	;;
 
     [nN][oO]|[nN])
